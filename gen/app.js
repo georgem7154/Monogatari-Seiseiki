@@ -10,6 +10,8 @@ import getstoryRouter from "./routes/getstory.js";
 import cors from "cors";
 import fullsrouter from "./routes/getstoryfull.js";
 import exportRouter from "./routes/export.js";
+import publishrouter from "./routes/publish.js";
+import getpublicrouter from "./routes/getpublic.js";
 
 var app = express();
 app.use(cors());
@@ -27,6 +29,9 @@ app.use("/api", imageRouter);
 app.use("/api", getstoryRouter);
 app.use("/api", fullsrouter);
 app.use("/api", exportRouter);
+app.use("/api", publishrouter);
+app.use("/api", getpublicrouter);
+
 
 
 app.listen(3000, () => {

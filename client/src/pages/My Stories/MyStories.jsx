@@ -150,33 +150,23 @@ const MyStories = () => {
   };
 
   const handleMakePublic = async () => {
-    if (!activeStory || !userId) return;
+  if (!activeStory || !userId) return;
 
-    try {
-      const res = await fetch(`/api/publishstory/${userId}/${activeStory.storyId}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ scenes: activeStory.scenes }),
-      });
+  try {
+    const res = await fetch(`http://localhost:3000/api/publishstory/${userId}/${activeStory.storyId}`, {
+      method: "POST"
+    });
 
-      const data = await res.json();
-      if (res.ok) {
-        alert("✅ Story published to PublicStories!");
-      } else {
-        console.error("❌ Failed to publish:", data.error);
-      }
-    } catch (err) {
-      console.error("❌ Error publishing story:", err);
+    const data = await res.json();
+    if (res.ok) {
+      alert("✅ Story published to PublicStories!");
+    } else {
+      console.error("❌ Failed to publish:", data.error || res.statusText);
     }
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
-        <p>Loading your stories...</p>
-      </div>
-    );
+  } catch (err) {
+    console.error("❌ Error publishing story:", err);
   }
+};
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
