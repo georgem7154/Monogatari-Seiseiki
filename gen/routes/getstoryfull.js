@@ -1,40 +1,23 @@
 import express from "express";
 import mongoose from "mongoose";
 
-const fullsrouter = express.Router();
+const storyRouter = express.Router();
 
-fullsrouter.get("/getfullstory/:userId", async (req, res) => {
-  const { userId } = req.params;
+storyRouter.get("/getstory/:userId/:storyId", async (req, res) => {
+  const { userId, storyId } = req.params;
 
   try {
-    const userDb = mongoose.connection.useDb(userId);
-    const collections = await userDb.db.listCollections().toArray();
+    const db = mongoose.connection.useDb(userId);
+    const collectionName = `story_${storyId}`;
+    const StoryModel = db.model(collectionName, new mongoose.Schema({}, { strict: false }));
 
-    const storySummaries = [];
+    const fullStory = await StoryModel.find().sort({ createdAt: 1 }); // Optional: sort by scene order
 
-    for (const col of collections) {
-      const collectionName = col.name;
-      if (!collectionName.startsWith("story_")) continue;
-
-      const StoryModel = userDb.model(collectionName, new mongoose.Schema({}, { strict: false }));
-      const metaDoc = await StoryModel.findOne({ sceneKey: "meta" });
-
-      if (metaDoc) {
-        storySummaries.push({
-          title: metaDoc.title || collectionName.replace("story_", "").replace(/_/g, " "),
-          cover: metaDoc.cover || null,
-          genre: metaDoc.genre || "unknown",
-          tone: metaDoc.tone || "unknown",
-          audience: metaDoc.audience || "unknown"
-        });
-      }
-    }
-
-    res.json(storySummaries);
+    res.json(fullStory);
   } catch (err) {
-    console.error("❌ Failed to fetch stories:", err);
-    res.status(500).json({ error: "Failed to retrieve stories." });
+    console.error("❌ Failed to fetch story:", err);
+    res.status(500).json({ error: "Failed to retrieve story." });
   }
 });
 
-export default fullsrouter;
+export default storyRouter;

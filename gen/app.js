@@ -9,6 +9,7 @@ import imageRouter from "./routes/image.js";
 import getstoryRouter from "./routes/getstory.js";
 import cors from "cors";
 import fullsrouter from "./routes/getstoryfull.js";
+import exportRouter from "./routes/export.js";
 
 var app = express();
 app.use(cors());
@@ -25,6 +26,7 @@ app.use("/api", storyRouter);
 app.use("/api", imageRouter);
 app.use("/api", getstoryRouter);
 app.use("/api", fullsrouter);
+app.use("/api", exportRouter);
 
 
 app.listen(3000, () => {

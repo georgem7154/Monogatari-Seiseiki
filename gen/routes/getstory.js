@@ -16,12 +16,14 @@ router.get("/getfullstory/:userId", async (req, res) => {
       const collectionName = col.name;
       if (!collectionName.startsWith("story_")) continue;
 
+      const storyId = collectionName.replace("story_", ""); // ✅ Extract storyId
       const StoryModel = userDb.model(collectionName, new mongoose.Schema({}, { strict: false }));
       const metaDoc = await StoryModel.findOne({ sceneKey: "meta" });
 
       if (metaDoc) {
         storySummaries.push({
-          title: metaDoc.title || collectionName.replace("story_", "").replace(/_/g, " "),
+          storyId, // ✅ Include storyId for frontend routing
+          title: metaDoc.title || storyId.replace(/_/g, " "),
           cover: metaDoc.cover || null,
           genre: metaDoc.genre || "unknown",
           tone: metaDoc.tone || "unknown",
