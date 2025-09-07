@@ -7,40 +7,32 @@ const imageRouter = express.Router();
 
 imageRouter.post("/genimg", async (req, res) => {
   const { userId, storyId, genre, tone, audience, story } = req.body;
-  const errors = [];
 
-  // 🔍 Validate basic fields
-  if (!userId || typeof userId !== "string") errors.push("Missing or invalid userId.");
-  if (!storyId || typeof storyId !== "string") errors.push("Missing or invalid storyId.");
-  if (!genre || typeof genre !== "string") errors.push("Missing or invalid genre.");
-  if (!tone || typeof tone !== "string") errors.push("Missing or invalid tone.");
-  if (!audience || typeof audience !== "string") errors.push("Missing or invalid audience.");
+  // ✅ One-liner validation for required fields
+  const requiredFields = [userId, storyId, genre, tone, audience, story?.title];
+  const hasMissingValues = requiredFields.some(
+    (field) => typeof field !== "string" || !field.trim()
+  );
 
-  // 🔍 Validate story object
-  if (!story || typeof story !== "object") {
-    errors.push("Missing or invalid story object.");
-  } else {
-    if (!story.title || typeof story.title !== "string" || !story.title.trim()) {
-      errors.push("Missing or invalid story title.");
-    }
-
-    const sceneKeys = Object.keys(story).filter((key) => key.startsWith("scene"));
-    if (sceneKeys.length === 0) {
-      errors.push("No scenes found in story.");
-    } else {
-      sceneKeys.forEach((key) => {
-        const text = story[key];
-        if (!text || typeof text !== "string" || text.trim().length < 10) {
-          errors.push(`Scene "${key}" is too short or missing.`);
-        }
-      });
-    }
+  if (hasMissingValues || typeof story !== "object") {
+    return res.status(400).json({
+      error: "One or more required fields are missing or invalid.",
+    });
   }
 
-  // 🚫 Return if any validation errors
-  if (errors.length > 0) {
-    console.warn("⚠️ Validation errors:", errors);
-    return res.status(400).json({ error: errors.join(" ") });
+  // ✅ Validate scenes
+  const sceneKeys = Object.keys(story).filter((key) => key.startsWith("scene"));
+  if (sceneKeys.length === 0) {
+    return res.status(400).json({ error: "No scenes found in story." });
+  }
+ 
+  for (const key of sceneKeys) {
+    const text = story[key];
+    if (!text || typeof text !== "string" || text.trim().length < 10) {
+      return res.status(400).json({
+        error: `Scene "${key}" is too short or missing.`,
+      });
+    }
   }
 
   // 🧪 Combine story text for moderation
@@ -49,12 +41,14 @@ imageRouter.post("/genimg", async (req, res) => {
     .join(" ");
   console.log("🧪 Combined story text for moderation:", combinedText);
 
+ console.log('hi')
   if (!isCleanPrompt(combinedText)) {
     return res.status(400).json({
       error: "Story contains harmful or inappropriate content.",
     });
   }
 
+ console.log('hi')
   const imageMap = {};
 
   // 🎨 Generate cover image
@@ -97,8 +91,7 @@ imageRouter.post("/genimg", async (req, res) => {
     cover: { image: imageMap["cover"] },
   };
 
-  for (const sceneKey of Object.keys(story)) {
-    if (!sceneKey.startsWith("scene")) continue;
+  for (const sceneKey of sceneKeys) {
     response[sceneKey] = {
       text: story[sceneKey],
       image: imageMap[sceneKey],

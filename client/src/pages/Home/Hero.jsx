@@ -114,7 +114,7 @@ function Hero() {
   return (
      // Wrap the entire Hero component's JSX in <GlowCapture>
     <GlowCapture>
-      <div className="relative min-h-screen text-white pt-20 bg-slate-900 p-6 overflow-hidden">
+      <div className="relative min-h-screen text-white pt-64 bg-slate-900 p-6 overflow-hidden">
         {/* Starfield Background */}
         <div className="absolute inset-0 z-0 h-full w-full">
           <Canvas style={{ height: "100%", width: "100%" }}>
