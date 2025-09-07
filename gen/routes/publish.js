@@ -1,6 +1,5 @@
 import express from "express";
 import mongoose from "mongoose";
-import publicStorySchema from "../models/publicStorySchema.js";
 
 const router = express.Router();
 
@@ -17,24 +16,41 @@ router.post("/publishstory/:userId/:storyId", async (req, res) => {
       return res.status(404).json({ error: "Story not found or empty" });
     }
 
-    // 🔹 Connect to public DB and check for duplicates
+    // 🔹 Connect to shared public DB
     const publicDb = mongoose.connection.useDb("public");
-    const PublicModel = publicDb.model("public_stories", publicStorySchema);
 
-    const existing = await PublicModel.findOne({ storyId });
-    if (existing) {
+    // 🔹 Check if story already published
+    const existingCollections = await publicDb.db.listCollections({ name: `story_${storyId}` }).toArray();
+    if (existingCollections.length > 0) {
       return res.status(409).json({ error: "Story already published" });
     }
 
-    // 🔹 Publish to public DB
-    await PublicModel.create({
-      storyId,
-      userId,
-      publishedAt: new Date(),
-      scenes,
-    });
+    // 🔹 Create a new collection for this story
+    const PublicStoryModel = publicDb.model(`story_${storyId}`, new mongoose.Schema({}, { strict: false }));
+    await PublicStoryModel.insertMany(scenes);
 
-    res.json({ message: "✅ Story published successfully" });
+    // 🔹 Optionally log metadata in a central index
+    const IndexModel = publicDb.model("published_index", new mongoose.Schema({}, { strict: false }));
+    const meta = scenes.find(s => s.sceneKey === "meta");
+
+    await IndexModel.updateOne(
+      { storyId },
+      {
+        $set: {
+          storyId,
+          userId,
+          title: meta?.title || storyId,
+          genre: meta?.genre || null,
+          tone: meta?.tone || null,
+          audience: meta?.audience || null,
+          cover: meta?.cover || null,
+          publishedAt: new Date(),
+        }
+      },
+      { upsert: true }
+    );
+
+    res.json({ message: "✅ Story published to its own collection in public DB" });
   } catch (err) {
     console.error("❌ Error publishing story:", err);
     res.status(500).json({ error: "Failed to publish story" });

@@ -12,6 +12,7 @@ import fullsrouter from "./routes/getstoryfull.js";
 import exportRouter from "./routes/export.js";
 import publishrouter from "./routes/publish.js";
 import getpublicrouter from "./routes/getpublic.js";
+import publicStoryRouter from "./routes/publicstory.js";
 
 var app = express();
 app.use(cors());
@@ -31,6 +32,7 @@ app.use("/api", fullsrouter);
 app.use("/api", exportRouter);
 app.use("/api", publishrouter);
 app.use("/api", getpublicrouter);
+app.use("/api", publicStoryRouter);
 
 
 
