@@ -8,6 +8,7 @@ import { MONGO_URI } from "./config/env.js";
 import imageRouter from "./routes/image.js";
 import getstoryRouter from "./routes/getstory.js";
 import cors from "cors";
+import fullsrouter from "./routes/getstoryfull.js";
 
 var app = express();
 app.use(cors());
@@ -23,6 +24,8 @@ mongoose
 app.use("/api", storyRouter);
 app.use("/api", imageRouter);
 app.use("/api", getstoryRouter);
+app.use("/api", fullsrouter);
+
 
 app.listen(3000, () => {
   console.log("Server is running on port 3000");

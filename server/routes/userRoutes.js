@@ -5,6 +5,7 @@ import {
   createUser,
   deleteUser,
   findUserByEmail,
+  findUserByEmailFromToken,
   getAllUsers,
   getUser,
   login,
@@ -14,7 +15,7 @@ import {
 } from "../controller/userController.js";
 router.route("/").get(getAllUsers).post(validatePassword, createUser);
 router.route("/:id").delete(deleteUser).patch(updateUser).get(getUser);
-router.route("/find/user").get(findUserByEmail);
+router.route("/find/userbyemail").get(findUserByEmailFromToken);
 router.route("/login/user").post(login);
 router.route("/logout/user").post(logout);
 router.route("/verifytoken/user").get(verifyToken);

@@ -8,30 +8,47 @@ const Output = () => {
   useEffect(() => {
     const stored = localStorage.getItem("generatedStoryPayload");
     if (!stored) {
+      console.error("⚠️ No payload found in localStorage.");
       setLoading(false);
       return;
     }
 
     const payload = JSON.parse(stored);
-    setMeta({
-      title: payload.storyId.replace(/-/g, " "),
-      genre: payload.genre,
-      tone: payload.tone,
-      audience: payload.audience
-    });
 
-    fetch("http://localhost:3000/api/genimg", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+    // Optional: enrich with authenticated userId
+    fetch("/user/find/userbyemail", {
+      method: "GET",
+      credentials: "include"
     })
-      .then((res) => res.json())
-      .then((data) => {
+      .then(res => res.json())
+      .then(userData => {
+        const userId = userData?.userId || payload.userId || "george123";
+
+        const enrichedPayload = {
+          ...payload,
+          userId
+        };
+
+        setMeta({
+          title: enrichedPayload.storyId.replace(/_/g, " "),
+          genre: enrichedPayload.genre,
+          tone: enrichedPayload.tone,
+          audience: enrichedPayload.audience
+        });
+
+        return fetch("http://localhost:3000/api/genimg", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(enrichedPayload)
+        });
+      })
+      .then(res => res.json())
+      .then(data => {
         setStoryData(data);
         setLoading(false);
       })
-      .catch((err) => {
-        console.error("❌ Failed to fetch image data:", err);
+      .catch(err => {
+        console.error("❌ Failed to load illustrated story:", err);
         setLoading(false);
       });
   }, []);
@@ -75,27 +92,27 @@ const Output = () => {
         </div>
       )}
 
-      {/* ✅ Dynamic Story Sections */}
+      {/* ✅ Story Scenes */}
       <div className="max-w-4xl mx-auto space-y-10">
         {Object.entries(storyData)
-          .filter(([key]) => key !== "cover")
-          .map(([sectionKey, section]) => (
-            <div key={sectionKey} className="bg-white p-6 rounded-lg shadow-md border border-indigo-100">
-              <h2 className="text-2xl font-semibold text-indigo-600 mb-4">
-                {sectionKey.replace(/_/g, " ").toUpperCase()}
-              </h2>
-              <p className="text-gray-800 mb-4 whitespace-pre-line">
-                {section.text}
-              </p>
-              {section.image && (
-                <img
-                  src={`data:image/png;base64,${section.image}`}
-                  alt={`${sectionKey} visual`}
-                  className="w-full h-auto rounded-md border border-gray-300"
-                />
-              )}
-            </div>
-          ))}
+  .filter(([key]) => key !== "cover" && key !== "title")
+  .map(([sceneKey, scene]) => (
+    <div key={sceneKey} className="bg-white p-6 rounded-lg shadow-md border border-indigo-100">
+      <h2 className="text-2xl font-semibold text-indigo-600 mb-4">
+        {sceneKey.replace("scene", "Scene ").toUpperCase()}
+      </h2>
+      <p className="text-gray-800 mb-4 whitespace-pre-line">
+        {scene.text}
+      </p>
+      {scene.image && (
+        <img
+          src={`data:image/png;base64,${scene.image}`}
+          alt={`${sceneKey} visual`}
+          className="w-full h-auto rounded-md border border-gray-300"
+        />
+      )}
+    </div>
+  ))}
       </div>
     </div>
   );

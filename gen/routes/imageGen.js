@@ -4,7 +4,10 @@ import { GOOG } from "../config/env.js";
 
 const ai = new GoogleGenAI({ apiKey: GOOG });
 
-export async function generateImage(prompt, { userId = "user", storyId = "story", sceneKey = "scene" }) {
+export async function generateImage(
+  prompt,
+  { userId = "user", storyId = "story", sceneKey = "scene" }
+) {
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash-image-preview",
     contents: prompt,

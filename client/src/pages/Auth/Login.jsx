@@ -32,11 +32,12 @@ const Login = () => {
         { email: formData.email, password: formData.password },
         { withCredentials: true }
       );
-      if (prevPage === "/auth/register") {
-        navigate("/");
+      if (prevPage === "/register") {
+        window.location.href = "/";
+
         localStorage.removeItem("prevPage"); // Clear after redirect
       } else {
-        navigate(-1);
+        window.location.href = "/";
       }
 
       toast.success("sucessfully logged in");
@@ -56,7 +57,7 @@ const Login = () => {
             </div>
             <div className="text-green-400  cur3">
               {" "}
-              <Link to="/auth/register"> Register Here</Link>
+              <Link to="/register"> Register Here</Link>
             </div>
             <label>Email</label>
             <input

@@ -1,9 +1,9 @@
 import express from "express";
 import mongoose from "mongoose";
 
-const router = express.Router();
+const fullsrouter = express.Router();
 
-router.get("/getfullstory/:userId", async (req, res) => {
+fullsrouter.get("/getfullstory/:userId", async (req, res) => {
   const { userId } = req.params;
 
   try {
@@ -37,4 +37,4 @@ router.get("/getfullstory/:userId", async (req, res) => {
   }
 });
 
-export default router;
+export default fullsrouter;

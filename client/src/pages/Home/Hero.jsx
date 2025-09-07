@@ -3,10 +3,10 @@ import toast from "react-hot-toast";
 
 function Hero() {
   const [form, setForm] = useState({
-    prompt: "",
-    genre: "",
-    tone: "",
-    audience: "",
+    prompt: "A detective solves crimes by entering victims' dreams.",
+    genre: "mystery",
+    tone: "mythic",
+    audience: "young adult"
   });
 
   const genreOptions = [
@@ -15,7 +15,7 @@ function Hero() {
     "mystery",
     "historical",
     "romance",
-    "horror",
+    "horror"
   ];
   const toneOptions = [
     "dark",
@@ -23,26 +23,27 @@ function Hero() {
     "serious",
     "satirical",
     "uplifting",
+    "mythic"
   ];
   const audienceOptions = [
     "young adult",
     "children",
     "adult",
     "general",
-    "educators",
+    "educators"
   ];
 
   const promptIdeas = [
     "A scientist discovers a portal to a parallel universe.",
     "An ancient artifact awakens a forgotten civilization.",
-    "A rogue AI begins rewriting history through digital archives.",
+    "An AI begins rewriting history through digital archives.",
     "A time traveler accidentally prevents their own birth.",
     "A haunted library reveals secrets of the cosmos.",
     "A rebellion forms in a utopia where emotions are illegal.",
     "A chef must win a cooking duel to save their hometown.",
     "A child befriends a dragon disguised as a schoolteacher.",
     "A detective solves crimes by entering victims' dreams.",
-    "A spaceship crew finds Earth… but it's not the one they left.",
+    "A spaceship crew finds Earth… but it's not the one they left."
   ];
 
   const handleChange = (e) => {
@@ -58,8 +59,8 @@ function Hero() {
         background: "#1e293b",
         color: "#facc15",
         border: "1px solid #fbbf24",
-        borderRadius: "8px",
-      },
+        borderRadius: "8px"
+      }
     });
   };
 
@@ -74,8 +75,8 @@ function Hero() {
           borderRadius: "8px",
           background: "#fff",
           color: "#333",
-          border: "1px solid #facc15",
-        },
+          border: "1px solid #facc15"
+        }
       });
       return;
     }
@@ -83,7 +84,7 @@ function Hero() {
     localStorage.setItem("storyForm", JSON.stringify(form));
     toast.success("Redirecting to edit page...");
     setTimeout(() => {
-      window.location.href = "http://localhost:5173/edittext";
+      window.location.href = "/edittext";
     }, 1000);
   };
 

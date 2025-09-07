@@ -110,21 +110,41 @@ export const logout = async (req, res, next) => {
 
 };
 
-export const verifyToken = async (req, res) => {
+  export const verifyToken = async (req, res) => {
+    const { token } = req.cookies;
+    if (!token)
+      return res.status(401).json({ message: "Unauthorized, token missing" });
+
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET);
+
+      if (!decoded.userId) {
+        return res.status(400).json({ message: "Invalid userId in token" });
+      }
+
+      req.userId = decoded.userId;
+      res.status(200).json({ message: "Protected content", userId: req.userId });
+    } catch (error) {
+      return res.status(403).json({ message: "Invalid or expired token" });
+    }
+  };
+  
+export const findUserByEmailFromToken = async (req, res, next) => {
   const { token } = req.cookies;
-  if (!token)
-    return res.status(401).json({ message: "Unauthorized, token missing" });
+  if (!token) return next(new UnauthorisedError("Token missing"));
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
+    const user = await User.findById(decoded.userId).select("_id email user_name");
 
-    if (!decoded.userId) {
-      return res.status(400).json({ message: "Invalid userId in token" });
-    }
+    if (!user) return next(new NotFoundError("User not found"));
 
-    req.userId = decoded.userId;
-    res.status(200).json({ message: "Protected content", userId: req.userId });
-  } catch (error) {
-    return res.status(403).json({ message: "Invalid or expired token" });
+    res.status(StatusCodes.OK).json({
+      email: user.email,
+      user_name: user.user_name,
+      userId: user._id // ✅ This is the actual unique MongoDB ID
+    });
+  } catch (err) {
+    return next(new UnauthorisedError("Invalid or expired token"));
   }
 };

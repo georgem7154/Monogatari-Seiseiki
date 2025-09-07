@@ -1,14 +1,16 @@
 import mongoose from "mongoose";
 
 const sceneSchema = new mongoose.Schema({
-  sceneKey: String,
-  text: String,
-  image: String,
+  sceneKey: String,           // "meta", "scene1", "scene2", etc.
+  text: String,               // scene content or title (if sceneKey === "meta")
+  image: String,              // base64 image (cover if sceneKey === "meta")
+  title: String,              // ✅ story title (only in meta doc)
+  cover: String,              // ✅ base64 cover image (only in meta doc)
   genre: String,
   tone: String,
   audience: String,
-  styleTags: [String], // optional: ["digital painting", "anime"]
-  createdAt: { type: Date, default: Date.now },
+  styleTags: [String],
+  createdAt: { type: Date, default: Date.now }
 });
 
 export default function getStoryModel(userId, storyId) {

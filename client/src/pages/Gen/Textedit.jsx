@@ -29,14 +29,13 @@ const Textedit = () => {
       const data = await res.json();
       if (res.ok) {
         setTitle(data.title || "Untitled Story");
-        const formatted = {
-          "Scene 1": data.scene1,
-          "Scene 2": data.scene2,
-          "Scene 3": data.scene3,
-          "Scene 4": data.scene4,
-          "Scene 5": data.scene5
-        };
-        setStory(formatted);
+        setStory({
+          scene1: data.scene1,
+          scene2: data.scene2,
+          scene3: data.scene3,
+          scene4: data.scene4,
+          scene5: data.scene5
+        });
       } else {
         console.error("❌ API error:", data.error || "Unknown error");
       }
@@ -48,20 +47,27 @@ const Textedit = () => {
   };
 
   const handleSceneEdit = (key, html) => {
-    setStory((prev) => ({ ...prev, [key]: html }));
+    setStory((prev) => ({
+      ...prev,
+      [key]: html
+    }));
   };
 
   const handleGenerateImages = () => {
-    const editedStory = {};
+    const editedStory = {
+      title: title.trim()
+    };
+
     Object.entries(sceneRefs.current).forEach(([key, ref]) => {
       if (ref?.innerText) {
-        editedStory[key.toLowerCase().replace(" ", "")] = ref.innerText.trim();
+        const sceneKey = key.toLowerCase().replace(/\s+/g, ""); // "Scene 1" → "scene1"
+        editedStory[sceneKey] = ref.innerText.trim();
       }
     });
 
     const payload = {
-      userId: "gordon", // placeholder for now
-      storyId: title.toLowerCase().replace(/\s+/g, "-"),
+      userId: "george123",
+      storyId: title.toLowerCase().replace(/\s+/g, "_"),
       genre: form.genre,
       tone: form.tone,
       audience: form.audience,
@@ -69,7 +75,7 @@ const Textedit = () => {
     };
 
     localStorage.setItem("generatedStoryPayload", JSON.stringify(payload));
-    window.location.href = "http://localhost:5173/output";
+    window.location.href = "/output";
   };
 
   if (loading) {
@@ -116,7 +122,7 @@ const Textedit = () => {
             className="bg-white p-4 rounded-lg shadow-md border border-indigo-100"
           >
             <h3 className="text-xl font-semibold text-indigo-600 mb-2">
-              {key}
+              {key.replace("scene", "Scene ")}
             </h3>
             <div
               contentEditable

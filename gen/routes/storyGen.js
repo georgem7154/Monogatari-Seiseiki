@@ -9,18 +9,20 @@ export async function generateStructuredStory({
   tone,
   audience,
 }) {
-  const systemPrompt = `
+const systemPrompt = `
 You are a cinematic story formatter. Break the story into 4–5 distinct scenes.
 Each scene must be 30–75 words max.
+
 Expand the story into a multi-part narrative, typically:
 • Introduction / Setting
 • Conflict / Rising Action
 • Climax
 • Resolution
-and anything else that fits.
 
-Respond ONLY as a JSON object with keys:
+Respond ONLY as a **valid JSON object** with the following keys:
 "title", "scene1", "scene2", "scene3", "scene4", "scene5"
+
+Each scene must be a **single string**, not an object. Do NOT use nested keys like "setting" or "action".
 
 Use the following context:
 Genre: ${genre}

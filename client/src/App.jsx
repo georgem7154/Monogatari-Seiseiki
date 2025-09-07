@@ -47,15 +47,15 @@ const App = () => {
           path="/output"
           element={<Output authChecker={authChecker} setAuthChecker={setAuthChecker} />}
         >
-          <Route
-            path="login"
+        </Route>
+ <Route
+            path="/login"
             element={<Login authChecker={authChecker} setAuthChecker={setAuthChecker} />}
           />
           <Route
-            path="register"
+            path="/register"
             element={<Register authChecker={authChecker} setAuthChecker={setAuthChecker} />}
           />
-        </Route>
         <Route path="*" element={<RouteError />} />
       </Routes>
     </>

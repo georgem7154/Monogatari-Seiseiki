@@ -1,7 +1,6 @@
 import { Glow, GlowCapture } from "@codaworks/react-glow";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import PageTransition from "../../PageTransition";
 import React from "react";
 import { useEffect } from "react";
 import { useState } from "react";
@@ -143,7 +142,7 @@ const Register = () => {
       if (response.status == 201) {
         toast.success("user created");
         // console.log("bye");
-        navigate("/auth/login");
+        navigate("/login");
       }
     } catch (error) {
       setError("couldn't create use please contact admin");
@@ -171,8 +170,10 @@ const Register = () => {
                   Already Registered?{" "}
                   <Link
                     className="hover:text-black cur3 text-white"
-                     onClick={() => localStorage.setItem("prevPage", "/auth/register")}
-                    to="/auth/login"
+                    onClick={() =>
+                      localStorage.setItem("prevPage", "/auth/register")
+                    }
+                    to="/login"
                   >
                     Login
                   </Link>
@@ -278,7 +279,7 @@ const Register = () => {
                     🥸 Email Already exists please{" "}
                     <Link
                       className="hover:text-black cur3 text-white"
-                      to="/auth/login"
+                      to="/login"
                     >
                       Login
                     </Link>

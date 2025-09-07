@@ -11,8 +11,6 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
-    "@canvasjs/react-stockcharts": "^1.0.2",
-    "@canvasjs/stockcharts": "^1.12.15",
     "@codaworks/react-glow": "^1.0.6",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
@@ -21,8 +19,6 @@
     "autoprefixer": "^10.4.21",
     "axios": "^1.9.0",
     "cross-env": "^7.0.3",
-    "framer-motion": "^12.12.2",
-    "gsap": "^3.13.0",
     "patch-package": "^8.0.0",
     "postcss": "^8.5.3",
     "react": "^19.1.0",
