@@ -1,9 +1,51 @@
-import { Glow, GlowCapture } from "@codaworks/react-glow";
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { Stars } from "@react-three/drei";
+import { easing } from "maath";
+import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
-import Ribbon from "../Home/Ribbon";
+import axios from "axios";
+
+// Enhanced Starfield component with the same physics as Register page
+function MovingStars() {
+  const ref = useRef();
+
+  // This hook runs on every frame
+  useFrame((state, delta) => {
+    // 1. Continuous Spinning Movement
+    ref.current.rotation.x += delta * 0.02; // Slower continuous spin on X
+    ref.current.rotation.y += delta * 0.03; // Slightly faster continuous spin on Y
+
+    // 2. Interactive Movement based on mouse position (smoothed)
+    // We'll add this to the existing rotation, so it acts as an offset
+    // Instead of directly setting rotation, we'll ease towards a target that includes mouse influence
+    easing.damp3(
+      ref.current.rotation,
+      [
+        ref.current.rotation.x + state.mouse.y * 0.05, // Add mouse Y influence to X rotation
+        ref.current.rotation.y + state.mouse.x * 0.05, // Add mouse X influence to Y rotation
+        0
+      ],
+      0.25, // Smoothing factor
+      delta   // Time since last frame
+    );
+  });
+
+  return (
+    <group ref={ref}>
+      <Stars
+        radius={100}
+        depth={50}
+        count={5000}
+        factor={7}      // Increased factor for larger stars
+        saturation={1}  // Increased saturation for more color
+        fade
+        speed={1}
+      />
+    </group>
+  );
+}
+
 const Login = () => {
   const prevPage = localStorage.getItem("prevPage");
   const navigate = useNavigate();
@@ -14,14 +56,17 @@ const Login = () => {
     email: "",
     password: "",
   });
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    // console.log(formData);
   };
+
   useEffect(() => {
-    setTimeout(() => {
-      setError("");
-    }, 5000);
+    if(error){
+        setTimeout(() => {
+          setError("");
+        }, 5000);
+    }
   }, [error]);
 
   const handleSubmit = async (e) => {
@@ -32,57 +77,66 @@ const Login = () => {
         { email: formData.email, password: formData.password },
         { withCredentials: true }
       );
+      
+      // Using navigate for smoother transitions within React Router
+      toast.success("Successfully logged in");
       if (prevPage === "/register") {
-        window.location.href = "/";
-
+        navigate("/");
         localStorage.removeItem("prevPage"); // Clear after redirect
       } else {
-        window.location.href = "/";
+        navigate("/");
       }
 
-      toast.success("sucessfully logged in");
     } catch (error) {
-      // console.log(error);
       setError("Invalid Credentials");
+      toast.error("Invalid Credentials");
     }
   };
+
   return (
-    <div className="flex justify-center bg-black rounded-xl items-center w-screen h-screen">
-      {/* <Ribbon /> */}
-      <GlowCapture>
-        <Glow color="purple">
-          <form className="flex glow:ring-2 glow:bg-glow/15 m-5 p-16 glow:ring-glow flex-col">
-            <div className="text-center  mb-5 text-4xl font-press glow:text-cyan-500/100">
+    <div className="bg-slate-900 w-screen h-screen overflow-hidden relative">
+      {/* Starfield Background */}
+      <div className="absolute inset-0 z-0 h-full w-full">
+        <Canvas style={{ height: "100%", width: "100%" }}>
+          <fog attach="fog" args={["#0f172a", 0, 70]} />
+          <MovingStars />
+        </Canvas>
+      </div>
+
+      {/* Main Content */}
+      <div className="relative z-10 w-screen h-screen flex text-slate-400 justify-center items-center">
+        <div className="border-2 border-yellow-400/50 shadow-2xl shadow-yellow-400/30 flex flex-col m-1 bg-slate-900/80 backdrop-blur-md rounded-2xl p-10">
+          <form className="flex flex-col" onSubmit={handleSubmit}>
+            <div className="text-center mb-5 text-4xl font-press text-yellow-300 drop-shadow-[0_0_10px_rgba(250,204,21,0.5)]">
               Login
             </div>
-            <div className="text-green-400  cur3">
-              {" "}
-              <Link to="/register"> Register Here</Link>
+            <div className="text-base text-center mb-6">
+              Don't have an account?{" "}
+              <Link to="/register" className="hover:text-yellow-300 transition-colors text-white font-semibold">
+                Register Here
+              </Link>
             </div>
-            <label>Email</label>
+            <label className="text-lg">Email</label>
             <input
               type="email"
               name="email"
-              className="mt-4 mb-9 ml-5 rounded-xl text-xl p-1 cur2 text-white text-opacity-100 bg-black bg-opacity-0 ring-2"
+              className="mt-2 mb-6 rounded-xl text-xl p-2 text-white bg-slate-800/80 ring-1 ring-slate-600 focus:ring-yellow-400 focus:outline-none"
               required
               onChange={handleChange}
             />
-            <label>Password</label>
-
+            <label className="text-lg">Password</label>
             <div className="flex flex-row items-center">
               <input
                 type={showpwd ? "text" : "password"}
                 name="password"
-                className="my-6 ml-5 mb-4 rounded-xl text-xl p-1 cur2 text-white text-opacity-100 bg-black bg-opacity-0 ring-2"
+                className="mt-2 mb-4 rounded-xl text-xl p-2 w-full text-white bg-slate-800/80 ring-1 ring-slate-600 focus:ring-yellow-400 focus:outline-none"
                 required
                 onChange={handleChange}
               />
               <button
                 type="button"
-                onClick={() => {
-                  showpwd ? setShowPwd(false) : setShowPwd(true);
-                }}
-                className="ml-3 flex hover:text-red-50 text-slate-600"
+                onClick={() => setShowPwd(!showpwd)}
+                className="ml-3 flex hover:text-white text-slate-600 transition-colors"
               >
                 <svg
                   width="30px"
@@ -98,21 +152,20 @@ const Login = () => {
                 </svg>
               </button>
             </div>
-            <div className="text-red-500 text-base">{error}</div>
+            {error && <div className="text-red-500 text-base text-center h-6">{error}</div>}
             <button
               onMouseEnter={() => setIsHovered1(true)}
               onMouseLeave={() => setIsHovered1(false)}
-              className={`cur3 p-2 mt-10 rounded-full mx-5 ${
-                isHovered1 ? "bg-green-700" : "glow:bg-green-600/100"
-              }`}
+              className={`p-2 mt-4 rounded-full mx-5 text-lg font-bold ${
+                isHovered1 ? "bg-green-700" : "bg-green-600"
+              } text-white transition-colors`}
               type="submit"
-              onClick={handleSubmit}
             >
               Login
             </button>
           </form>
-        </Glow>
-      </GlowCapture>
+        </div>
+      </div>
     </div>
   );
 };

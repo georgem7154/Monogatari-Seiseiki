@@ -1,12 +1,51 @@
-import { Glow, GlowCapture } from "@codaworks/react-glow";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import React from "react";
-import { useEffect } from "react";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { Stars } from "@react-three/drei";
+import { easing } from "maath";
+import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import Ribbon from "../Home/Ribbon";
+
+// Component for the moving starfield with brighter stars
+function MovingStars() {
+  const ref = useRef();
+
+  // This hook runs on every frame
+  useFrame((state, delta) => {
+    // 1. Continuous Spinning Movement
+    ref.current.rotation.x += delta * 0.02; // Slower continuous spin on X
+    ref.current.rotation.y += delta * 0.03; // Slightly faster continuous spin on Y
+
+    // 2. Interactive Movement based on mouse position (smoothed)
+    // We'll add this to the existing rotation, so it acts as an offset
+    // Instead of directly setting rotation, we'll ease towards a target that includes mouse influence
+    easing.damp3(
+      ref.current.rotation,
+      [
+        ref.current.rotation.x + state.mouse.y * 0.05, // Add mouse Y influence to X rotation
+        ref.current.rotation.y + state.mouse.x * 0.05, // Add mouse X influence to Y rotation
+        0
+      ],
+      0.25, // Smoothing factor
+      delta   // Time since last frame
+    );
+  });
+
+  return (
+    <group ref={ref}>
+      <Stars
+        radius={100}
+        depth={50}
+        count={5000}
+        factor={7}      // Increased factor for larger stars
+        saturation={1}  // Increased saturation for more color
+        fade
+        speed={1}
+      />
+    </group>
+  );
+}
+
 const Register = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -150,26 +189,33 @@ const Register = () => {
   };
 
   return (
-    <GlowCapture className="bg-black max-sm:py-24 w-screen h-screen">
-      {/* <Ribbon/> */}
-      <div className="w-screen h-screen flex text-slate-400 justify-center items-center">
-        <Glow color="red">
-          <div className="flex flex-col glow:ring-2 glow:ring-glow m-1 glow:bg-blue-600/25 rounded-2xl px-14 pb-14 p-5">
-            <div className="text-center  mb-5 text-4xl font-press glow:text-fuchsia-500/100">
+    <div className="bg-slate-900 max-sm:py-24 w-screen h-screen overflow-hidden relative">
+      {/* Starfield Background */}
+      <div className="absolute inset-0 z-0 h-full w-full">
+        <Canvas style={{ height: "100%", width: "100%" }}>
+          <fog attach="fog" args={['#0f172a', 0, 70]} />
+          <MovingStars />
+        </Canvas>
+      </div>
+
+      {/* Main Content */}
+      <div className="relative z-10 w-screen h-screen flex text-slate-400 justify-center items-center">
+        <div className="border-2 border-yellow-400/50 shadow-2xl shadow-yellow-400/30 flex flex-col m-1 bg-slate-900/80 backdrop-blur-md rounded-2xl px-14 pb-14 p-5">
+            <div className="text-center mb-5 text-4xl font-press text-yellow-300 drop-shadow-[0_0_10px_rgba(250,204,21,0.5)]">
               Register
             </div>
             <div
-              className="flex max-sm:flex-col  flex-row"
+              className="flex max-sm:flex-col flex-row"
               aria-autocomplete="off"
             >
               <form
-                className="flex flex-col glow:ring-2 glow-ring p-10 text-2xl mr-10"
+                className="flex flex-col border-2 border-slate-700/50 p-10 text-2xl mr-10 rounded-lg bg-slate-800/20"
                 onSubmit={handleSubmit}
               >
                 <div className="text-base">
                   Already Registered?{" "}
                   <Link
-                    className="hover:text-black cur3 text-white"
+                    className="hover:text-yellow-300 transition-colors text-white font-semibold"
                     onClick={() =>
                       localStorage.setItem("prevPage", "/auth/register")
                     }
@@ -178,16 +224,16 @@ const Register = () => {
                     Login
                   </Link>
                 </div>
-                <label>Name</label>
+                <label className="mt-4 text-lg">Name</label>
                 <input
                   type="text"
                   name="name"
                   required
-                  className="my-2 ml-5 rounded-xl text-xl p-1 cur2 text-white text-opacity-100 bg-black bg-opacity-0 ring-2"
+                  className="my-2 rounded-xl text-xl p-2 text-white bg-slate-800/80 ring-1 ring-slate-600 focus:ring-yellow-400 focus:outline-none"
                   onChange={handleChange}
                 />
                 <div>
-                  <label>Email</label>
+                  <label className="text-lg">Email</label>
                   {counter ? (
                     <button
                       type="button"
@@ -202,8 +248,8 @@ const Register = () => {
                       type="button"
                       onClick={emailValidate}
                       className={`text-base ml-10 ${
-                        isHovered ? "bg-green-500" : "glow:bg-yellow-500/100"
-                      } px-2 rounded-full text-white cur3`}
+                        isHovered ? "bg-green-500" : "bg-yellow-500/80"
+                      } px-2 rounded-full text-slate-900 font-semibold transition-colors`}
                     >
                       Validate
                     </button>
@@ -212,17 +258,17 @@ const Register = () => {
                 <input
                   type="email"
                   name="email"
-                  className="my-2 ml-5 rounded-xl text-xl p-1 cur2 text-white text-opacity-100 bg-black bg-opacity-0 ring-2"
+                  className="my-2 rounded-xl text-xl p-2 text-white bg-slate-800/80 ring-1 ring-slate-600 focus:ring-yellow-400 focus:outline-none"
                   required
                   onChange={handleChange}
                 />
-                <label>Password</label>
+                <label className="text-lg">Password</label>
 
                 <div className="flex flex-row items-center">
                   <input
                     type={showpwd ? "text" : "password"}
                     name="password"
-                    className="my-2 ml-5 mb-4 rounded-xl text-xl p-1 cur2 text-white text-opacity-100 bg-black bg-opacity-0 ring-2"
+                    className="my-2 mb-4 rounded-xl text-xl p-2 text-white bg-slate-800/80 ring-1 ring-slate-600 focus:ring-yellow-400 focus:outline-none"
                     required
                     onChange={handleChange}
                   />
@@ -231,7 +277,7 @@ const Register = () => {
                     onClick={() => {
                       showpwd ? setShowPwd(false) : setShowPwd(true);
                     }}
-                    className="ml-3 flex hover:text-red-50 text-slate-600"
+                    className="ml-3 flex hover:text-white text-slate-600 transition-colors"
                   >
                     <svg
                       width="30px"
@@ -250,8 +296,9 @@ const Register = () => {
                 <div className="text-red-500 text-base mb-8">{error}</div>
                 {isDisabled ? (
                   <button
-                    className="glow:bg-glow/100 rounded-full mx-5"
+                    className="bg-red-500/50 rounded-full mx-5 cursor-not-allowed py-2 text-white font-bold"
                     type="button"
+                    disabled
                   >
                     Locked
                   </button>
@@ -259,9 +306,9 @@ const Register = () => {
                   <button
                     onMouseEnter={() => setIsHovered1(true)}
                     onMouseLeave={() => setIsHovered1(false)}
-                    className={`cur3 rounded-full mx-5 ${
-                      isHovered1 ? "bg-green-700" : "glow:bg-green-600/100"
-                    }`}
+                    className={`rounded-full mx-5 py-2 ${
+                      isHovered1 ? "bg-green-700" : "bg-green-600"
+                    } text-white font-bold transition-colors`}
                     type="submit"
                     onClick={handleSubmit}
                   >
@@ -269,8 +316,8 @@ const Register = () => {
                   </button>
                 )}
               </form>
-              <div className="glow:ring-2 glow-ring max-sm:text-center">
-                <div className="my-6 text-xl text-center glow:text-green-500/100">
+              <div className="border-2 border-slate-700/50 p-6 rounded-lg max-sm:text-center bg-slate-800/20">
+                <div className="my-6 text-xl text-center text-green-400">
                   Rules
                 </div>
                 <div className="my-4">{uname} Name</div>
@@ -278,7 +325,7 @@ const Register = () => {
                   <div className="my-4">
                     🥸 Email Already exists please{" "}
                     <Link
-                      className="hover:text-black cur3 text-white"
+                      className="hover:text-yellow-300 transition-colors text-white font-semibold"
                       to="/login"
                     >
                       Login
@@ -300,9 +347,8 @@ const Register = () => {
               </div>
             </div>
           </div>
-        </Glow>
       </div>
-    </GlowCapture>
+    </div>
   );
 };
 export default Register;
