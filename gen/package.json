@@ -1,0 +1,24 @@
+{
+  "name": "gen",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "dependencies": {
+    "@google/genai": "^1.17.0",
+    "@langchain/core": "^0.3.75",
+    "@langchain/google-genai": "^0.2.17",
+    "cookie-parser": "~1.4.4",
+    "cors": "^2.8.5",
+    "debug": "~2.6.9",
+    "dotenv": "^17.2.2",
+    "express": "^4.21.2",
+    "leo-profanity": "^1.8.0",
+    "mongodb": "^6.19.0",
+    "mongoose": "^8.18.0",
+    "morgan": "^1.10.1"
+  }
+}
